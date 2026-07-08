@@ -93,19 +93,43 @@
     </div>
 
     <script>
+        // 1. 利用可能な音声リストを格納する準備
+        let voices = [];
+
+        function loadVoices() {
+            voices = window.speechSynthesis.getVoices();
+        }
+
+        // ブラウザの音声準備が整ったタイミングでリストを取得する（途切れ対策）
+        loadVoices();
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = loadVoices;
+        }
+
         function speakAndReveal(cardElement, text) {
-            // 1. すでに音声再生中の場合は停止
             window.speechSynthesis.cancel();
 
-            // 2. 英語の発音を設定
             const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'en-US'; // アメリカ英語
-            utterance.rate = 0.9;     // 少しゆっくりめ（1.0が標準）
+            utterance.lang = 'en-US';
+            
+            // 速度を0.9から1.0（標準）に戻す（人工音声は標準速度の方が滑らかに聞こえやすいです）
+            utterance.rate = 1.0; 
 
-            // 3. 発音を実行
+            // 2. 高品質なネイティブ音声を探して指定する
+            // Chrome, Mac, Windows それぞれの代表的な高品質英語ボイスを優先して探します
+            const bestEnglishVoice = voices.find(voice => 
+                voice.name.includes('Google US English') || // PC版Chromeの高品質音声
+                voice.name.includes('Samantha') ||          // Mac/iPhoneの自然な音声
+                voice.name.includes('Zira') ||              // Windowsの自然な音声
+                voice.lang === 'en-US'                      // 上記がない場合の保険
+            );
+
+            // 見つかればその声をセットする
+            if (bestEnglishVoice) {
+                utterance.voice = bestEnglishVoice;
+            }
+
             window.speechSynthesis.speak(utterance);
-
-            // 4. 英単語の文字を表示（revealクラスを付け外し）
             cardElement.classList.toggle('reveal');
         }
     </script>
