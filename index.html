@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>英単語フラッシュカード</title>
+    <title>高音質・英単語フラッシュカード</title>
     <style>
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
@@ -17,6 +17,10 @@
         }
         h1 {
             color: #333;
+            margin-bottom: 10px;
+        }
+        p {
+            color: #666;
             margin-bottom: 30px;
         }
         .card-container {
@@ -24,6 +28,8 @@
             gap: 20px;
             flex-wrap: wrap;
             justify-content: center;
+            max-width: 1000px;
+            padding: 20px;
         }
         .card {
             background: white;
@@ -56,10 +62,9 @@
             font-size: 24px;
             font-weight: bold;
             color: #2c3e50;
-            opacity: 0; /* 最初は文字を隠す */
+            opacity: 0;
             transition: opacity 0.3s ease;
         }
-        /* クリック時にこのクラスを付与して文字を表示 */
         .card.reveal .word {
             opacity: 1;
         }
@@ -68,70 +73,69 @@
 <body>
 
     <h1>写真タップで英単語と発音</h1>
+    <p>（高品質音声ファイル再生バージョン）</p>
 
-    <div class="card-container">
-        <div class="card" onclick="speakAndReveal(this, 'apple')">
-            <img src="https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400" alt="りんご">
-            <div class="word-box">
-                <span class="word">apple</span>
-            </div>
-        </div>
-
-        <div class="card" onclick="speakAndReveal(this, 'dog')">
-            <img src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=400" alt="犬">
-            <div class="word-box">
-                <span class="word">dog</span>
-            </div>
-        </div>
-
-        <div class="card" onclick="speakAndReveal(this, 'airplane')">
-            <img src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=400" alt="飛行機">
-            <div class="word-box">
-                <span class="word">airplane</span>
-            </div>
-        </div>
-    </div>
+    <div class="card-container" id="cardContainer"></div>
 
     <script>
-        // 1. 利用可能な音声リストを格納する準備
-        let voices = [];
-
-        function loadVoices() {
-            voices = window.speechSynthesis.getVoices();
-        }
-
-        // ブラウザの音声準備が整ったタイミングでリストを取得する（途切れ対策）
-        loadVoices();
-        if (speechSynthesis.onvoiceschanged !== undefined) {
-            speechSynthesis.onvoiceschanged = loadVoices;
-        }
-
-        function speakAndReveal(cardElement, text) {
-            window.speechSynthesis.cancel();
-
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'en-US';
-            
-            // 速度を0.9から1.0（標準）に戻す（人工音声は標準速度の方が滑らかに聞こえやすいです）
-            utterance.rate = 1.0; 
-
-            // 2. 高品質なネイティブ音声を探して指定する
-            // Chrome, Mac, Windows それぞれの代表的な高品質英語ボイスを優先して探します
-            const bestEnglishVoice = voices.find(voice => 
-                voice.name.includes('Google US English') || // PC版Chromeの高品質音声
-                voice.name.includes('Samantha') ||          // Mac/iPhoneの自然な音声
-                voice.name.includes('Zira') ||              // Windowsの自然な音声
-                voice.lang === 'en-US'                      // 上記がない場合の保険
-            );
-
-            // 見つかればその声をセットする
-            if (bestEnglishVoice) {
-                utterance.voice = bestEnglishVoice;
+        // 1. 単語のデータをここにまとめて管理します
+        // 今後、単語を増やしたい時は、この中身を増やすだけで自動的に画面に反映されます！
+        const wordData = [
+            {
+                word: 'apple',
+                image: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400',
+                audio: 'audio/apple.mp3' // audioフォルダの中のmp3ファイルを指定
+            },
+            {
+                word: 'dog',
+                image: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=400',
+                audio: 'audio/dog.mp3'
+            },
+            {
+                word: 'airplane',
+                image: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=400',
+                audio: 'audio/airplane.mp3'
             }
+        ];
 
-            window.speechSynthesis.speak(utterance);
-            cardElement.classList.toggle('reveal');
-        }
+        const container = document.getElementById('cardContainer');
+        let currentAudio = null; // 現在再生中の音声を保持する変数
+
+        // 2. データからHTMLのカードを自動生成する
+        wordData.forEach(data => {
+            // カードの枠を作る
+            const card = document.createElement('div');
+            card.className = 'card';
+            
+            // カードの中身（画像と単語スペース）を設定
+            card.innerHTML = `
+                <img src="${data.image}" alt="${data.word}">
+                <div class="word-box">
+                    <span class="word">${data.word}</span>
+                </div>
+            `;
+
+            // カードがクリックされた時の処理
+            card.addEventListener('click', () => {
+                // すでに他の音声が流れていたら止める
+                if (currentAudio) {
+                    currentAudio.pause();
+                    currentAudio.currentTime = 0;
+                }
+
+                // 新しい音声ファイルを読み込んで再生
+                currentAudio = new Audio(data.audio);
+                currentAudio.play().catch(error => {
+                    console.log("音声の再生に失敗しました。ファイルパスが正しいか確認してください。", error);
+                });
+
+                // 単語を表示する
+                card.classList.toggle('reveal');
+            });
+
+            // 画面にカードを追加
+            container.appendChild(card);
+        });
     </script>
 </body>
 </html>
