@@ -35,38 +35,85 @@
             background: white;
             border-radius: 15px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            width: 250px;
+            width: 280px;
             overflow: hidden;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
             text-align: center;
+            position: relative;
         }
         .card:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 25px rgba(0,0,0,0.15);
         }
-        .card img {
+        .card-img-wrapper {
+            position: relative;
             width: 100%;
             height: 200px;
+        }
+        .card img {
+            width: 100%;
+            height: 100%;
             object-fit: cover;
+        }
+        /* バッジ（プレート）のスタイル */
+        .card-badge {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background-color: rgba(44, 62, 80, 0.85);
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 2;
         }
         .word-box {
             padding: 15px;
-            height: 50px;
+            min-height: 60px;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             background: #fafafa;
         }
-        .word {
-            font-size: 24px;
+
+        /* 初期プレースホルダー表示（Who? / Title?） */
+        .placeholder-text {
+            font-size: 16px;
+            color: #888;
             font-weight: bold;
-            color: #2c3e50;
-            opacity: 0;
+            line-height: 1.4;
             transition: opacity 0.3s ease;
         }
-        .card.reveal .word {
-            opacity: 1;
+        .card.revealed .placeholder-text {
+            display: none; /* 10秒後に消す */
+        }
+
+        /* 10秒後に表示されるテキスト */
+        .info-text-wrapper {
+            opacity: 0;
+            display: none;
+            transition: opacity 0.5s ease;
+        }
+        .card.revealed .info-text-wrapper {
+            display: block;
+            opacity: 1; /* 10秒後にフェードイン表示 */
+        }
+
+        .word {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            line-height: 1.3;
+        }
+        .sub-word {
+            font-size: 13px;
+            color: #666;
+            margin-top: 6px;
+            line-height: 1.2;
         }
     </style>
 </head>
@@ -78,13 +125,12 @@
     <div class="card-container" id="cardContainer"></div>
 
     <script>
-        // 1. 単語のデータをここにまとめて管理します
-        // 今後、単語を増やしたい時は、この中身を増やすだけで自動的に画面に反映されます！
+        // 単語データの管理
         const wordData = [
             {
                 word: 'Wake up',
                 image: 'images/wake_up.png',
-                audio: 'audio/wake_up.mp3' // audioフォルダの中のmp3ファイルを指定
+                audio: 'audio/wake_up.mp3'
             },
             {
                 word: 'sunny',
@@ -117,7 +163,6 @@
                 audio: 'audio/school_bag.mp3'
             },
             {
-                // ★修正箇所：文字の中に ' が含まれるため、全体を " " で囲みました
                 word: "I'm leaving!",
                 image: "images/i'm_leaving.png",
                 audio: "audio/i'm_leaving.mp3"
@@ -125,7 +170,7 @@
             {
                 word: 'apple',
                 image: 'images/apple.jpg',
-                audio: 'audio/apple.mp3' // audioフォルダの中のmp3ファイルを指定
+                audio: 'audio/apple.mp3'
             },
             {
                 word: 'cake',
@@ -161,45 +206,101 @@
                 word: 'I got it!',
                 image: 'images/i_got_it.png',
                 audio: 'audio/i_got_it.mp3'
+            },
+            // 作曲家カード（バッハ）
+            {
+                type: 'composer',
+                word: "Johann Sebastian Bach (Germany,1685∼1750)",
+                subWord: "Toccata and Fugue in D minor, BWV 565",
+                delay: 10000, // 表示までの遅延時間（10秒 = 10000ミリ秒）
+                image: "images/Bach.jpg",
+                audio: "audio/bach_toccata_and_fuggue.mp3"
             }
         ];
 
         const container = document.getElementById('cardContainer');
-        let currentAudio = null; // 現在再生中の音声を保持する変数
+        let currentAudio = null; // 現在再生中の音声を保持
+        let activeTimer = null;  // 10秒タイマーの制御用
 
-        // 2. データからHTMLのカードを自動生成する
+        // データからHTMLのカードを自動生成する
         wordData.forEach(data => {
-            // カードの枠を作る
             const card = document.createElement('div');
             card.className = 'card';
             
-            // カードの中身（画像と単語スペース）を設定
-            card.innerHTML = `
-                <img src="${data.image}" alt="${data.word}">
-                <div class="word-box">
-                    <span class="word">${data.word}</span>
-                </div>
-            `;
+            // クラシック作曲家カードと通常の英単語カードで表示を分岐
+            if (data.type === 'composer') {
+                // 作曲家カードの場合（Who? / Title? を初期表示）
+                card.innerHTML = `
+                    <div class="card-img-wrapper">
+                        <img src="${data.image}" alt="${data.word}">
+                    </div>
+                    <div class="word-box">
+                        <div class="placeholder-text">
+                            <div>Who?</div>
+                            <div>Title?</div>
+                        </div>
+                        <div class="info-text-wrapper">
+                            <div class="word">${data.word}</div>
+                            <div class="sub-word">${data.subWord}</div>
+                        </div>
+                    </div>
+                `;
 
-            // カードがクリックされた時の処理
-            card.addEventListener('click', () => {
-                // すでに他の音声が流れていたら止める
-                if (currentAudio) {
-                    currentAudio.pause();
-                    currentAudio.currentTime = 0;
-                }
+                card.addEventListener('click', () => {
+                    // 他の音声を停止
+                    if (currentAudio) {
+                        currentAudio.pause();
+                        currentAudio.currentTime = 0;
+                    }
+                    // 動作中のタイマーがあればクリア
+                    if (activeTimer) {
+                        clearTimeout(activeTimer);
+                    }
 
-                // 新しい音声ファイルを読み込んで再生
-                currentAudio = new Audio(data.audio);
-                currentAudio.play().catch(error => {
-                    console.log("音声の再生に失敗しました。ファイルパスが正しいか確認してください。", error);
+                    // 再タップ時は一度表示を初期（Who?/Title?）に戻す
+                    card.classList.remove('revealed');
+
+                    // 新しい音声を再生
+                    currentAudio = new Audio(data.audio);
+                    currentAudio.play().catch(error => {
+                        console.log("音声再生エラー:", error);
+                    });
+
+                    // 指定秒数（10秒）後に文字を表示
+                    activeTimer = setTimeout(() => {
+                        card.classList.add('revealed');
+                    }, data.delay || 10000);
                 });
 
-                // 単語を表示する
-                card.classList.toggle('reveal');
-            });
+            } else {
+                // 通常の英単語カードの場合（既存の動作）
+                card.innerHTML = `
+                    <div class="card-img-wrapper">
+                        <img src="${data.image}" alt="${data.word}">
+                    </div>
+                    <div class="word-box">
+                        <span class="word">${data.word}</span>
+                    </div>
+                `;
 
-            // 画面にカードを追加
+                card.addEventListener('click', () => {
+                    if (currentAudio) {
+                        currentAudio.pause();
+                        currentAudio.currentTime = 0;
+                    }
+                    if (activeTimer) {
+                        clearTimeout(activeTimer);
+                    }
+
+                    currentAudio = new Audio(data.audio);
+                    currentAudio.play().catch(error => {
+                        console.log("音声再生エラー:", error);
+                    });
+
+                    card.classList.toggle('revealed');
+                });
+            }
+
             container.appendChild(card);
         });
     </script>
