@@ -48,18 +48,21 @@
             box-shadow: 0 8px 25px rgba(0,0,0,0.15);
         }
 
-        /* 画像エリアの調整（枠からはみ出ないように固定 height: 180px に指定） */
+        /* 画像エリアの調整 */
         .card-img-wrapper {
             position: relative;
             width: 100%;
-            height: 180px;
-            background-color: #eee;
+            height: 200px;
+            background-color: #f0f0f0; /* 背景色を敷いておく */
             flex-shrink: 0;
+            overflow: hidden;
         }
         .card img {
             width: 100%;
             height: 100%;
+            /* 上端を基準にして切り抜くことで頭頂部が切れるのを防ぎます */
             object-fit: cover;
+            object-position: center top; 
             display: block;
         }
 
@@ -84,7 +87,6 @@
             opacity: 0;
             transition: opacity 0.3s ease;
         }
-        /* revealクラスがついた時だけ表示 */
         .card.reveal .normal-word {
             opacity: 1;
         }
@@ -92,7 +94,6 @@
         /* -------------------------------------------
            作曲家カードのスタイル
         ------------------------------------------- */
-        /* 初期状態：Who? (黒字) / Title? (青字) */
         .placeholder-text {
             display: flex;
             flex-direction: column;
@@ -109,25 +110,22 @@
             color: #1e66d5; /* 青字 */
         }
 
-        /* 10秒後に切り替わるテキスト */
         .info-text-wrapper {
             display: none;
             opacity: 0;
             transition: opacity 0.5s ease;
         }
 
-        /* 10秒経過後（revealクラス付与時）の表示切替 */
         .card.reveal .placeholder-text {
-            display: none; /* プレースホルダーを非表示 */
+            display: none;
         }
         .card.reveal .info-text-wrapper {
             display: flex;
             flex-direction: column;
             align-items: center;
-            opacity: 1;    /* フェードイン表示 */
+            opacity: 1;
         }
 
-        /* 10秒後の名前（黒字）とタイトル（青字） */
         .composer-name {
             font-size: 15px;
             font-weight: bold;
@@ -191,7 +189,7 @@
             {
                 word: "I'm leaving!",
                 image: "images/i'm_leaving.png",
-                audio: "audio/i'm_leaving!.mp3"
+                audio: "audio/i'm_leaving.mp3"
             },
             {
                 word: 'apple',
@@ -238,7 +236,7 @@
                 type: 'composer',
                 word: "Johann Sebastian Bach (Germany,1685∼1750)",
                 subWord: "Toccata and Fugue in D minor, BWV 565",
-                delay: 10000, // 10秒後に文字表示
+                delay: 10000,
                 image: "images/Bach.jpg",
                 audio: "audio/bach_toccata_and_fuggue.mp3"
             }
@@ -271,7 +269,6 @@
                 `;
 
                 card.addEventListener('click', () => {
-                    // 音声とタイマーをリセット
                     if (currentAudio) {
                         currentAudio.pause();
                         currentAudio.currentTime = 0;
@@ -280,16 +277,13 @@
                         clearTimeout(activeTimer);
                     }
 
-                    // 再タップ時は初期表示に戻す
                     card.classList.remove('reveal');
 
-                    // 音声再生
                     currentAudio = new Audio(data.audio);
                     currentAudio.play().catch(error => {
                         console.log("音声再生エラー:", error);
                     });
 
-                    // 10秒後に文字を切り替え表示
                     activeTimer = setTimeout(() => {
                         card.classList.add('reveal');
                     }, data.delay || 10000);
@@ -320,7 +314,6 @@
                         console.log("音声再生エラー:", error);
                     });
 
-                    // タップごとに表示/非表示を切り替え
                     card.classList.toggle('reveal');
                 });
             }
