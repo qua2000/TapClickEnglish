@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英単語フラッシュカード</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f5f7fa;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .card-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 250px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-align: center;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        .word-box {
+            padding: 15px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fafafa;
+        }
+        .word {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            opacity: 0; /* 最初は文字を隠す */
+            transition: opacity 0.3s ease;
+        }
+        /* クリック時にこのクラスを付与して文字を表示 */
+        .card.reveal .word {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>写真タップで英単語と発音</h1>
+
+    <div class="card-container">
+        <div class="card" onclick="speakAndReveal(this, 'apple')">
+            <img src="https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400" alt="りんご">
+            <div class="word-box">
+                <span class="word">apple</span>
+            </div>
+        </div>
+
+        <div class="card" onclick="speakAndReveal(this, 'dog')">
+            <img src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=400" alt="犬">
+            <div class="word-box">
+                <span class="word">dog</span>
+            </div>
+        </div>
+
+        <div class="card" onclick="speakAndReveal(this, 'airplane')">
+            <img src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=400" alt="飛行機">
+            <div class="word-box">
+                <span class="word">airplane</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function speakAndReveal(cardElement, text) {
+            // 1. すでに音声再生中の場合は停止
+            window.speechSynthesis.cancel();
+
+            // 2. 英語の発音を設定
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US'; // アメリカ英語
+            utterance.rate = 0.9;     // 少しゆっくりめ（1.0が標準）
+
+            // 3. 発音を実行
+            window.speechSynthesis.speak(utterance);
+
+            // 4. 英単語の文字を表示（revealクラスを付け外し）
+            cardElement.classList.toggle('reveal');
+        }
+    </script>
+</body>
+</html>

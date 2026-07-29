@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高音質・英単語フラッシュカード</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f5f7fa;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .card-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 1000px;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 250px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-align: center;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        .word-box {
+            padding: 15px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fafafa;
+        }
+        .word {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .card.reveal .word {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>写真タップで英単語と発音</h1>
+    <p>（高品質音声ファイル再生バージョン）</p>
+
+    <div class="card-container" id="cardContainer"></div>
+
+    <script>
+        // 1. 単語のデータをここにまとめて管理します
+        // 今後、単語を増やしたい時は、この中身を増やすだけで自動的に画面に反映されます！
+        const wordData = [
+            {
+                word: 'apple',
+                image: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400',
+                audio: 'audio/apple.mp3' // audioフォルダの中のmp3ファイルを指定
+            },
+            {
+                word: 'dog',
+                image: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=400',
+                audio: 'audio/dog.mp3'
+            },
+            {
+                word: 'airplane',
+                image: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=400',
+                audio: 'audio/airplane.mp3'
+            }
+        ];
+
+        const container = document.getElementById('cardContainer');
+        let currentAudio = null; // 現在再生中の音声を保持する変数
+
+        // 2. データからHTMLのカードを自動生成する
+        wordData.forEach(data => {
+            // カードの枠を作る
+            const card = document.createElement('div');
+            card.className = 'card';
+            
+            // カードの中身（画像と単語スペース）を設定
+            card.innerHTML = `
+                <img src="${data.image}" alt="${data.word}">
+                <div class="word-box">
+                    <span class="word">${data.word}</span>
+                </div>
+            `;
+
+            // カードがクリックされた時の処理
+            card.addEventListener('click', () => {
+                // すでに他の音声が流れていたら止める
+                if (currentAudio) {
+                    currentAudio.pause();
+                    currentAudio.currentTime = 0;
+                }
+
+                // 新しい音声ファイルを読み込んで再生
+                currentAudio = new Audio(data.audio);
+                currentAudio.play().catch(error => {
+                    console.log("音声の再生に失敗しました。ファイルパスが正しいか確認してください。", error);
+                });
+
+                // 単語を表示する
+                card.classList.toggle('reveal');
+            });
+
+            // 画面にカードを追加
+            container.appendChild(card);
+        });
+    </script>
+</body>
+</html>
