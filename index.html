@@ -66,6 +66,16 @@
             display: block;
         }
 
+        /* 【新設】画家・絵画カード専用：絵のサイズに合わせて高さを自動で伸ばす */
+        .card.painter-card .card-img-wrapper {
+            height: auto;
+            background-color: #000; /* 絵画の余白部分を自然に見せるための背景色 */
+        }
+        .card.painter-card img {
+            height: auto;
+            object-fit: contain;
+        }
+
         .word-box {
             padding: 15px 10px;
             min-height: 70px;
@@ -435,6 +445,7 @@
 
             } else if (data.type === 'painter') {
                 // 【画家・絵画カード】
+                card.classList.add('painter-card'); // 画家カード専用クラスを適用
                 card.dataset.step = '0'; // 初期状態
 
                 card.innerHTML = `
@@ -488,7 +499,7 @@
 
                         card.painterTimer = setTimeout(() => {
                             wordBox.innerHTML = `
-                                <span class="painter-title">${data.artwork2Title}</span>
+                                <span class="painter-title">${data.artwork1Title ? data.artwork2Title : ''}</span>
                                 <span class="painter-museum">(${data.artwork2Museum})</span>
                             `;
                         }, 5000);
