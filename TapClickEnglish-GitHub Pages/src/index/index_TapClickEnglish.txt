@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高音質・英単語フラッシュカード</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f5f7fa;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .card-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 1000px;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 250px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-align: center;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        .word-box {
+            padding: 15px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fafafa;
+        }
+        .word {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .card.reveal .word {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Tap Click English</h1>
+    <p> </p>
+
+    <div class="card-container" id="cardContainer"></div>
+
+    <script>
+        // 1. 単語のデータをここにまとめて管理します
+        // 今後、単語を増やしたい時は、この中身を増やすだけで自動的に画面に反映されます！
+        const wordData = [
+            {
+                word: 'Wake up',
+                image: 'images/wake_up.png',
+                audio: 'audio/wake_up.mp3' // audioフォルダの中のmp3ファイルを指定
+            },
+            {
+                word: 'sunny',
+                image: 'images/sunny.png',
+                audio: 'audio/sunny.mp3'
+            },
+            {
+                word: 'rainy',
+                image: 'images/rainy.png',
+                audio: 'audio/rainy.mp3'
+            },
+            {
+                word: 'Wash my face.',
+                image: 'images/wash_my_face.png',
+                audio: 'audio/wash_my_face.mp3'
+            },
+            {
+                word: 'toothbrush',
+                image: 'images/toothbrush.png',
+                audio: 'audio/toothbrush.mp3'
+            },
+            {
+                word: 'breakfast',
+                image: 'images/breakfast.jpg',
+                audio: 'audio/breakfast.mp3'
+            },
+            {
+                word: 'school bag',
+                image: 'images/school_bag.jpg',
+                audio: 'audio/school_bag.mp3'
+            },
+            {
+                // ★修正箇所：文字の中に ' が含まれるため、全体を " " で囲みました
+                word: "I'm leaving!",
+                image: "images/i'm_leaving.png",
+                audio: "images/i'm_leaving.mp3"
+            },
+            {
+                word: 'apple',
+                image: 'images/apple.jpg',
+                audio: 'audio/apple.mp3' // audioフォルダの中のmp3ファイルを指定
+            },
+            {
+                word: 'cake',
+                image: 'images/cake.jpg',
+                audio: 'audio/cake.mp3'
+            },
+            {
+                word: 'lion',
+                image: 'images/lion.jpg',
+                audio: 'audio/lion.mp3'
+            },
+            {
+                word: 'panda',
+                image: 'images/panda.jpg',
+                audio: 'audio/panda.mp3'
+            },
+            {
+                word: 'airplane',
+                image: 'images/airplane.jpg',
+                audio: 'audio/airplane.mp3'
+            },
+            {
+                word: 'butter',
+                image: 'images/butter.png',
+                audio: 'audio/butter.mp3'
+            },
+            {
+                word: 'Good morning',
+                image: 'images/good_morning.png',
+                audio: 'audio/good_morning.mp3'
+            },
+            {
+                word: 'I got it!',
+                image: 'images/i_got_it.png',
+                audio: 'audio/i_got_it.mp3'
+            }
+        ];
+
+        const container = document.getElementById('cardContainer');
+        let currentAudio = null; // 現在再生中の音声を保持する変数
+
+        // 2. データからHTMLのカードを自動生成する
+        wordData.forEach(data => {
+            // カードの枠を作る
+            const card = document.createElement('div');
+            card.className = 'card';
+            
+            // カードの中身（画像と単語スペース）を設定
+            card.innerHTML = `
+                <img src="${data.image}" alt="${data.word}">
+                <div class="word-box">
+                    <span class="word">${data.word}</span>
+                </div>
+            `;
+
+            // カードがクリックされた時の処理
+            card.addEventListener('click', () => {
+                // すでに他の音声が流れていたら止める
+                if (currentAudio) {
+                    currentAudio.pause();
+                    currentAudio.currentTime = 0;
+                }
+
+                // 新しい音声ファイルを読み込んで再生
+                currentAudio = new Audio(data.audio);
+                currentAudio.play().catch(error => {
+                    console.log("音声の再生に失敗しました。ファイルパスが正しいか確認してください。", error);
+                });
+
+                // 単語を表示する
+                card.classList.toggle('reveal');
+            });
+
+            // 画面にカードを追加
+            container.appendChild(card);
+        });
+    </script>
+</body>
+</html>
