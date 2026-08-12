@@ -66,7 +66,7 @@
             display: block;
         }
 
-        /* 【新設】画家・絵画カード専用：絵のサイズに合わせて高さを自動で伸ばす */
+        /* 画家・絵画カード専用：絵のサイズに合わせて高さを自動で伸ばす */
         .card.painter-card .card-img-wrapper {
             height: auto;
             background-color: #000; /* 絵画の余白部分を自然に見せるための背景色 */
@@ -97,6 +97,14 @@
         }
         .card.reveal .normal-word {
             opacity: 1;
+        }
+
+        /* 会話カード用のテキスト表示 */
+        .conversation-word {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            line-height: 1.3;
         }
 
         /* 作曲家カードのスタイル */
@@ -304,7 +312,7 @@
             },
             {
                 word: "train",               // 表示する英単語
-                image: "images/train.png",   // 画像ファイルのパス
+                image: "images/train.jpg",   // 画像ファイルのパス
                 audio: "audio/train.mp3"     // 音声ファイルのパス
             },
             {
@@ -458,7 +466,28 @@
                 delay: 20000,
                 image: "images/Ludwig_van_Beethoven.png",
                 audio: "audio/Beethoven_symphony_no.5.mp3"
-            }
+            },
+            // --- 会話フレーズ（ステップ切り替え方式） ---
+            {
+                type: "conversation",
+                image: "images/see_you.jpg",
+                steps: [
+                    { text: "A: See you tomorrow!", audio: "audio/see_you_tomorrow.mp3" },
+                    { text: "B: Have a nice day!", audio: "audio/have_a_nice_day.mp3" }
+                ]
+            },
+            // --- 日常フレーズ（11個） ---
+            { word: "Have a nice day!", image: "images/have_a_nice_day_card.jpg", audio: "audio/have_a_nice_day.mp3" },
+            { word: "Cheers!", image: "images/cheers.jpg", audio: "audio/cheers.mp3" },
+            { word: "Enjoy your meal!", image: "images/enjoy_your_meal.jpg", audio: "audio/enjoy_your_meal.mp3" },
+            { word: "I'm exhausted.", image: "images/im_exhausted.jpg", audio: "audio/im_exhausted.mp3" },
+            { word: "It's raining cats and dogs!", image: "images/raining_cats_and_dogs.jpg", audio: "audio/raining_cats_and_dogs.mp3" },
+            { word: "Let's take a break.", image: "images/lets_take_a_break.jpg", audio: "audio/lets_take_a_break.mp3" },
+            { word: "Mind your step.", image: "images/mind_your_step.jpg", audio: "audio/mind_your_step.mp3" },
+            { word: "High five!", image: "images/high_five.jpg", audio: "audio/high_five.mp3" },
+            { word: "Thumbs up!", image: "images/thumbs_up.jpg", audio: "audio/thumbs_up.mp3" },
+            { word: "Time's up!", image: "images/times_up.jpg", audio: "audio/times_up.mp3" },
+            { word: "Keep it up!", image: "images/keep_it_up.jpg", audio: "audio/keep_it_up.mp3" }
         ];
 
         const container = document.getElementById('cardContainer');
@@ -469,7 +498,42 @@
             const card = document.createElement('div');
             card.className = 'card';
             
-            if (data.type === 'composer') {
+            if (data.type === 'conversation') {
+                // 【会話カード（ステップ切り替え）】
+                card.dataset.step = '0';
+                card.innerHTML = `
+                    <div class="card-img-wrapper">
+                        <img src="${data.image}" alt="Conversation">
+                    </div>
+                    <div class="word-box">
+                        <span class="painter-thinking">???</span>
+                    </div>
+                `;
+
+                card.addEventListener('click', () => {
+                    let step = parseInt(card.dataset.step || '0');
+                    step = (step + 1) % (data.steps.length + 1); // 0 -> 1 -> 2 -> 0...
+                    card.dataset.step = step;
+
+                    const wordBox = card.querySelector('.word-box');
+
+                    if (currentAudio) {
+                        currentAudio.pause();
+                        currentAudio.currentTime = 0;
+                    }
+
+                    if (step === 0) {
+                        wordBox.innerHTML = `<span class="painter-thinking">???</span>`;
+                    } else {
+                        const currentStep = data.steps[step - 1];
+                        wordBox.innerHTML = `<span class="conversation-word">${currentStep.text}</span>`;
+                        
+                        currentAudio = new Audio(currentStep.audio);
+                        currentAudio.play().catch(error => console.log("音声再生エラー:", error));
+                    }
+                });
+
+            } else if (data.type === 'composer') {
                 // 【作曲家カード】
                 card.innerHTML = `
                     <div class="card-img-wrapper">
