@@ -49,31 +49,25 @@
             box-shadow: 0 8px 25px rgba(0,0,0,0.15);
         }
 
-        /* 画像エリアの調整 */
+        /* 画像エリアの調整：写真の縦横比に合わせて自動伸縮 */
         .card-img-wrapper {
             position: relative;
             width: 100%;
-            height: 200px;
+            height: auto;
             background-color: #f0f0f0;
             flex-shrink: 0;
             overflow: hidden;
         }
         .card img {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
-            object-position: center top; 
+            height: auto;
+            object-fit: contain;
             display: block;
         }
 
-        /* 画家・絵画カード専用：絵のサイズに合わせて高さを自動で伸ばす */
+        /* 画家・絵画カード専用の黒背景設定 */
         .card.painter-card .card-img-wrapper {
-            height: auto;
-            background-color: #000; /* 絵画の余白部分を自然に見せるための背景色 */
-        }
-        .card.painter-card img {
-            height: auto;
-            object-fit: contain;
+            background-color: #000;
         }
 
         .word-box {
@@ -482,7 +476,7 @@
             { word: "Enjoy your meal!", image: "images/enjoy_your_meal.jpg", audio: "audio/enjoy_your_meal.mp3" },
             { word: "I'm exhausted.", image: "images/im_exhausted.jpg", audio: "audio/im_exhausted.mp3" },
             { word: "It's raining cats and dogs!", image: "images/raining_cats_and_dogs.jpg", audio: "audio/raining_cats_and_dogs.mp3" },
-            { word: "Let's take a break.", image: "images/lets_take_a_break.png", audio: "audio/lets_take_a_break.mp3" },
+            { word: "Let's take a break.", image: "images/lets_take_a_break.jpg", audio: "audio/lets_take_a_break.mp3" },
             { word: "Mind your step.", image: "images/mind_your_step.jpg", audio: "audio/mind_your_step.mp3" },
             { word: "High five!", image: "images/high_five.jpg", audio: "audio/high_five.mp3" },
             { word: "Thumbs up!", image: "images/thumbs_up.jpg", audio: "audio/thumbs_up.mp3" },
