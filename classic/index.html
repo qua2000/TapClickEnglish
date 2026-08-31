@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>クラシック音楽・作曲家カード</title>
+  <title>Classic Music Cards</title>
   <style>
     body {
       font-family: 'Helvetica Neue', Arial, sans-serif;
@@ -22,11 +22,16 @@
     .nav-header a {
       color: #555;
       text-decoration: none;
-      font-size: 14px;
+      font-size: 24px;
       font-weight: bold;
+      display: inline-block;
+      padding: 5px 15px;
+      background: #ffffff;
+      border-radius: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
     .nav-header a:hover {
-      text-decoration: underline;
+      background: #eee;
     }
 
     .card-container {
@@ -53,39 +58,53 @@
     .card-image-wrapper img {
       width: 100%;
       height: auto;
+      max-height: 450px;
       object-fit: contain;
+      object-position: center top;
       display: block;
     }
 
-    .card-text {
-      padding: 20px 10px;
-      font-size: 18px;
-      font-weight: bold;
-      color: #333333;
-      min-height: 40px;
+    .card-text-container {
+      padding: 15px 10px;
+      min-height: 60px;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      opacity: 0;
-      transition: opacity 0.5s ease-in-out;
-      line-height: 1.4;
+      gap: 4px;
     }
 
-    .card-text.fade-in {
+    .composer-text {
+      font-size: 16px;
+      font-weight: bold;
+      color: #333333;
       opacity: 1;
+      transition: opacity 0.5s ease-in-out;
+    }
+
+    .title-text {
+      font-size: 15px;
+      font-weight: bold;
+      color: #1A73E8; /* 青字 */
+      opacity: 1;
+      transition: opacity 0.5s ease-in-out;
+    }
+
+    .fade-out {
+      opacity: 0;
     }
 
     .controls {
       margin-top: 20px;
       display: flex;
-      gap: 15px;
+      gap: 20px;
     }
 
     button {
-      padding: 10px 20px;
-      font-size: 16px;
+      padding: 10px 25px;
+      font-size: 20px;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       background-color: #4A90E2;
       color: white;
       cursor: pointer;
@@ -100,19 +119,22 @@
 <body>
 
   <div class="nav-header">
-    <a href="../index.html">← 英単語カードへ戻る</a>
+    <a href="../index.html" title="Home">🏠</a>
   </div>
 
   <div class="card-container" id="cardContainer">
     <div class="card-image-wrapper">
-      <img id="cardImage" src="" alt="カード画像">
+      <img id="cardImage" src="" alt="Composer Card">
     </div>
-    <div class="card-text" id="cardText"></div>
+    <div class="card-text-container">
+      <div class="composer-text" id="composerText">Who?</div>
+      <div class="title-text" id="titleText">Title?</div>
+    </div>
   </div>
 
   <div class="controls">
-    <button id="prevBtn">前へ</button>
-    <button id="nextBtn">次へ</button>
+    <button id="prevBtn">◀</button>
+    <button id="nextBtn">▶</button>
   </div>
 
   <script>
@@ -121,82 +143,98 @@
     // ==========================================
     const wordData = [
       {
-        word: "Wolfgang Amadeus Mozart (Austria,1756∼1791)",
+        composer: "Wolfgang Amadeus Mozart (Austria,1756∼1791)",
+        title: "Eine kleine Nachtmusik, K. 525",
         image: "images/Wolfgang_Amadeus_Mozart.png",
         audio: "audio/Morzart_Eine_Kleine_Nachtmusik_K525.mp3"
       },
       {
-        word: "Antonio Vivaldi (Italy,1678–1741)",
+        composer: "Antonio Vivaldi (Italy,1678–1741)",
+        title: "The Four Seasons: Spring, RV 269",
         image: "images/Antonio_Vivaldi.jpg",
         audio: "audio/Vivaldi_The_Four_Seasons_spring_1_RV269.mp3"
       },
       {
-        word: "Richard Strauss (Germany,1864-1949)",
+        composer: "Richard Strauss (Germany,1864-1949)",
+        title: "Also sprach Zarathustra - Einleitung",
         image: "images/Richard_Strauss.jpg",
         audio: "audio/Strauss_R_Also_sprach_Zarathustra_Einleitung.mp3"
       },
       {
-        word: "Pyotr Ilyich Tchaikovsky (Russia,1840–1893)",
+        composer: "Pyotr Ilyich Tchaikovsky (Russia,1840–1893)",
+        title: "Piano Concerto No. 1 in B-flat minor, Op. 23",
         image: "images/Pyotr_Ilyich_Tchaikovsky.jpg",
         audio: "audio/Tchaikovsky_Piano_Concert_No1_1_Op23.mp3"
       },
       {
-        word: "Ludwig van Beethoven (Germany,1770-1827)",
+        composer: "Ludwig van Beethoven (Germany,1770-1827)",
         image: "images/Ludwig_van_Beethoven_2.jpg",
+        title: "Piano Sonata No. 14 'Moonlight', Op. 27 No. 2",
         audio: "audio/Beethoven_Piano_Sonata14_1_op27_2.mp3"
       },
       {
-        word: "Wolfgang Amadeus Mozart (Austria,1756∼1791)",
+        composer: "Wolfgang Amadeus Mozart (Austria,1756∼1791)",
+        title: "The Marriage of Figaro: Overture, KV 492",
         image: "images/Wolfgang_Amadeus_Mozart_2.jpg",
         audio: "audio/Mozart_The_Marriage_of_Figaro_Overture_KV492.mp3"
       },
       {
-        word: "Sergei Rachmaninoff (Russia,1873-1943)",
+        composer: "Sergei Rachmaninoff (Russia,1873-1943)",
+        title: "Piano Concerto No. 2 in C minor, Op. 18",
         image: "images/Sergei_Rachmaninoff.jpg",
         audio: "audio/Rachmaninov_Piano_Concert_No2_1.mp3"
       },
       {
-        word: "Ludwig van Beethoven (Germany,1770-1827)",
+        composer: "Ludwig van Beethoven (Germany,1770-1827)",
+        title: "Für Elise (Bagatelle No. 25)",
         image: "images/Ludwig_van_Beethoven_3.jpg",
         audio: "audio/Beethoven_Fur_Elise_Bagatelle_No25.mp3"
       },
       {
-        word: "Claude Debussy (France,1862–1918)",
+        composer: "Claude Debussy (France,1862–1918)",
+        title: "La fille aux cheveux de lin",
         image: "images/Claude_Debussy.jpg",
         audio: "audio/Debussy_La_fille_aux_cheveux_de_lin.mp3"
       },
       {
-        word: "Edward William Elgar (England,1857-1934)",
+        composer: "Edward William Elgar (England,1857-1934)",
+        title: "The Planets, Op. 32: Jupiter (Holst)",
         image: "images/Edward_William_Elgar.jpg",
         audio: "audio/Holst_Jupiter_the_Bringer_of_Jollity_from_The_Planets_Op32.mp3"
       },
       {
-        word: "Johann Strauss II (Austria,1825–1899)",
+        composer: "Johann Strauss II (Austria,1825–1899)",
+        title: "An der schönen blauen Donau, Op. 314",
         image: "images/Johann_Strauss_II.jpg",
         audio: "audio/Johann_Strauss_II_An_der_schonen_blauen_Donau_Op314.mp3"
       },
       {
-        word: "Johann Sebastian Bach (Germany,1685–1750)",
+        composer: "Johann Sebastian Bach (Germany,1685–1750)",
+        title: "Air on the G String (Suite No. 3, BWV 1068)",
         image: "images/Johann_Sebastian_Bach_2.jpg",
         audio: "audio/JS_Bach_Air_on_G_String_Suite_No3_II_Air_BWV1068.mp3"
       },
       {
-        word: "Maurice Ravel (France,1875-1937)",
+        composer: "Maurice Ravel (France,1875-1937)",
+        title: "Boléro",
         image: "images/Maurice_Ravel.jpg",
         audio: "audio/Ravel_Bolero_Tempo_di_Bolero_moderato_assai.mp3"
       },
       {
-        word: "Edward William Elgar (England,1857-1934)",
+        composer: "Edward William Elgar (England,1857-1934)",
+        title: "Pomp and Circumstance March No. 1, Op. 39",
         image: "images/Edward_William_Elgar.jpg",
         audio: "audio/Elger_Pomp_and_Circumstance_March_No_1_Op39.mp3"
       },
       {
-        word: "Georges Bizet (France,1838∼1875)",
+        composer: "Georges Bizet (France,1838∼1875)",
+        title: "Carmen Suite No. 1: Les Toréadors",
         image: "images/Georges_Bizet.jpg",
         audio: "audio/Bizet_Carmen_Suite_No_1_Final_Les_Toreadors.mp3"
       },
       {
-        word: "Pablo de Sarasate (Spain,1844∼1908)",
+        composer: "Pablo de Sarasate (Spain,1844∼1908)",
+        title: "Zigeunerweisen, Op. 20",
         image: "images/Pablo_de_Sarasate.jpg",
         audio: "audio/Sarasate_Zigeunerweisen_Op20.mp3"
       }
@@ -204,44 +242,77 @@
 
     let currentIndex = 0;
     let audioElement = new Audio();
+    let delayTimer = null;
+    let isRevealed = false;
 
     const cardContainer = document.getElementById('cardContainer');
     const cardImage = document.getElementById('cardImage');
-    const cardText = document.getElementById('cardText');
+    const composerText = document.getElementById('composerText');
+    const titleText = document.getElementById('titleText');
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
 
+    function resetCardText() {
+      if (delayTimer) clearTimeout(delayTimer);
+      isRevealed = false;
+      composerText.textContent = "Who?";
+      titleText.textContent = "Title?";
+    }
+
     function loadCard(index) {
+      // 音楽停止 & タイマーリセット
+      audioElement.pause();
+      audioElement.currentTime = 0;
+      resetCardText();
+
       const data = wordData[index];
       cardImage.src = data.image;
-      cardText.textContent = data.word;
-      cardText.classList.remove('fade-in');
       audioElement.src = data.audio;
     }
 
     function triggerCard() {
-      if (!cardText.classList.contains('fade-in')) {
-        cardText.classList.add('fade-in');
-      }
+      // 音声再生
       audioElement.currentTime = 0;
-      audioElement.play().catch(e => console.log("音声再生エラー:", e));
+      audioElement.play().catch(e => console.log("Audio play error:", e));
+
+      // 既に回答が表示されていなければ10秒後に表示へ切り替え
+      if (!isRevealed) {
+        if (delayTimer) clearTimeout(delayTimer);
+        
+        delayTimer = setTimeout(() => {
+          const data = wordData[currentIndex];
+          
+          // フェードアニメーションを伴ってテキスト変更
+          composerText.classList.add('fade-out');
+          titleText.classList.add('fade-out');
+          
+          setTimeout(() => {
+            composerText.textContent = data.composer;
+            titleText.textContent = data.title;
+            composerText.classList.remove('fade-out');
+            titleText.classList.remove('fade-out');
+            isRevealed = true;
+          }, 300);
+
+        }, 10000); // 10秒（10000ms）後に実行
+      }
     }
 
     cardContainer.addEventListener('click', triggerCard);
 
     prevBtn.addEventListener('click', (e) => {
-      e.stopPropagation(); // カードクリックの重複発火防止
+      e.stopPropagation();
       currentIndex = (currentIndex - 1 + wordData.length) % wordData.length;
       loadCard(currentIndex);
     });
 
     nextBtn.addEventListener('click', (e) => {
-      e.stopPropagation(); // カードクリックの重複発火防止
+      e.stopPropagation();
       currentIndex = (currentIndex + 1) % wordData.length;
       loadCard(currentIndex);
     });
 
-    // 初期ロード
+    // 初期化
     loadCard(currentIndex);
   </script>
 </body>
