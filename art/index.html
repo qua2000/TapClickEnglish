@@ -1,1 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Art & Painters - TapClickEnglish</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      background-color: #f4f4f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 10px;
+    }
+    .header {
+      width: 100%;
+      max-width: 500px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .home-btn {
+      font-size: 24px;
+      text-decoration: none;
+      background: white;
+      padding: 5px 12px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .card-container {
+      width: 100%;
+      max-width: 500px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 15px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .image-wrapper {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .image-wrapper img {
+      width: 100%;
+      height: auto;
+      max-height: 60vh;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+    .info-container {
+      margin-top: 15px;
+      text-align: center;
+      width: 100%;
+      min-height: 75px;
+    }
+    .line-who {
+      font-size: 22px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 5px;
+      transition: opacity 0.8s ease;
+    }
+    .line-title {
+      font-size: 18px;
+      color: #0056b3;
+      font-weight: 600;
+      transition: opacity 0.8s ease;
+    }
+    .fade-out { opacity: 0; }
+    .fade-in { opacity: 1; }
 
+    .nav-controls {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 500px;
+      margin-top: 15px;
+    }
+    .nav-btn {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 25px;
+      font-size: 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    .nav-btn:active { background: #0056b3; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <a href="../index.html" class="home-btn" title="Home">🏠</a>
+    <div id="card-counter" style="color: #666; font-weight: bold;">1 / 9</div>
+  </div>
+
+  <div class="card-container" id="card" onclick="nextStep()">
+    <div class="image-wrapper">
+      <img id="card-img" src="" alt="Painter or Artwork">
+    </div>
+    <div class="info-container">
+      <div id="line-who" class="line-who">Who?</div>
+      <div id="line-title" class="line-title">Title?</div>
+    </div>
+  </div>
+
+  <div class="nav-controls">
+    <button class="nav-btn" onclick="prevCard()">◀</button>
+    <button class="nav-btn" onclick="nextCard()">▶</button>
+  </div>
+
+  <!-- BGM用オーディオ要素 -->
+  <audio id="bgm-audio" loop></audio>
+
+  <script>
+    // 画家・絵画データ（全9セット）
+    const artData = [
+      {
+        painter: "Claude Monet (1840-1926)",
+        bgm: "", // 後日音声ファイルを追加する場合は例: "audio/monet.mp3"
+        profileImg: "images/Claude_Oscar_Monet.png",
+        artworks: [
+          {
+            img: "images/Claude_Monet_Impression_Sunrise.jpg",
+            title: "Impression, Sunrise",
+            museum: "Musée Marmottan Monet, Paris"
+          },
+          {
+            img: "images/Claude_Monet_Water_Lilies_part.jpg",
+            title: "Water Lilies",
+            museum: "Musée de l'Orangerie, Paris"
+          }
+        ]
+      },
+      {
+        painter: "Pierre-Auguste Renoir (1841-1919)",
+        bgm: "",
+        profileImg: "images/Pierre_Auguste_Renoir.jpg",
+        artworks: [
+          {
+            img: "images/Renoir_Dance_at_le_Moulin_de_la_Galette.jpg",
+            title: "Bal du moulin de la Galette",
+            museum: "Musée d'Orsay, Paris"
+          },
+          {
+            img: "images/Renoir_luncheon_of_the_Boating_Party.jpg",
+            title: "Luncheon of the Boating Party",
+            museum: "The Phillips Collection, Washington, D.C."
+          }
+        ]
+      },
+      {
+        painter: "Paul Cézanne (1839-1906)",
+        bgm: "",
+        profileImg: "images/Paul_Cezanne.jpg",
+        artworks: [
+          {
+            img: "images/Cezanne_Les_Joueurs_de_cartes.jpg",
+            title: "The Card Players",
+            museum: "Musée d'Orsay, Paris"
+          },
+          {
+            img: "images/Cezanne_Mont_Sainte_Victoire.jpg",
+            title: "Mont Sainte-Victoire",
+            museum: "Courtauld Institute of Art, London"
+          }
+        ]
+      },
+      {
+        painter: "Paul Gauguin (1848-1903)",
+        bgm: "",
+        profileImg: "images/Paul_Gauguin.jpg",
+        artworks: [
+          {
+            img: "images/Gauguin_Tahitian_Women_on_the_Beach.jpg",
+            title: "Tahitian Women on the Beach",
+            museum: "Musée d'Orsay, Paris"
+          },
+          {
+            img: "images/Gauguin_Le_Christ_jaune.jpg",
+            title: "The Yellow Christ",
+            museum: "Albright-Knox Art Gallery, Buffalo"
+          }
+        ]
+      },
+      {
+        painter: "Henri de Toulouse-Lautrec (1864-1901)",
+        bgm: "",
+        profileImg: "images/Toulouse_Lautrec.jpg",
+        artworks: [
+          {
+            img: "images/Lautrec_At_the_Moulin_Rouge.jpg",
+            title: "At the Moulin Rouge",
+            museum: "Art Institute of Chicago"
+          },
+          {
+            img: "images/Lautrec_jane_avril_at_the_jardin_de_paris.jpg",
+            title: "Jane Avril at the Jardin de Paris",
+            museum: "Poster Collection, Various"
+          }
+        ]
+      },
+      {
+        painter: "Henri Rousseau (1844-1910)",
+        bgm: "",
+        profileImg: "images/Henri_Rousseau.jpg",
+        artworks: [
+          {
+            img: "images/Rousseau_The_Sleeping_Gypsy.jpg",
+            title: "The Sleeping Gypsy",
+            museum: "Museum of Modern Art, New York"
+          },
+          {
+            img: "images/Rousseau_The_Snake_Charmer.jpg",
+            title: "The Snake Charmer",
+            museum: "Musée d'Orsay, Paris"
+          }
+        ]
+      },
+      {
+        painter: "Édouard Manet (1832-1883)",
+        bgm: "",
+        profileImg: "images/Edouard_Manet.jpg",
+        artworks: [
+          {
+            img: "images/Manet_Le_Dejeuner_sur_l'herbe.jpg",
+            title: "Le Déjeuner sur l'herbe",
+            museum: "Musée d'Orsay, Paris"
+          },
+          {
+            img: "images/Manet_A_Bar_at_the_Folies_Bergere.jpg",
+            title: "A Bar at the Folies-Bergère",
+            museum: "Courtauld Institute of Art, London"
+          }
+        ]
+      },
+      {
+        painter: "Edgar Degas (1834-1917)",
+        bgm: "",
+        profileImg: "images/Edgar_Degas.jpeg",
+        artworks: [
+          {
+            img: "images/Degas_Ballet_L'Etoile.jpg",
+            title: "Ballet (L'Étoile)",
+            museum: "Musée d'Orsay, Paris"
+          },
+          {
+            img: "images/Degas_In_a_Cafe.jpg",
+            title: "L'Absinthe In a Cafe",
+            museum: "Musée d'Orsay, Paris"
+          }
+        ]
+      },
+      {
+        painter: "Camille Pissarro (1830-1903)",
+        bgm: "",
+        profileImg: "images/Camille_Pissarro.jpg",
+        artworks: [
+          {
+            img: "images/Pissarro_Boulevard_Montmartre.jpg",
+            title: "Boulevard Montmartre, Spring Morning",
+            museum: "Metropolitan Museum of Art, New York"
+          },
+          {
+            img: "images/Pissarro_Red_roofs.jpg",
+            title: "Red Roofs",
+            museum: "Musée d'Orsay, Paris"
+          }
+        ]
+      }
+    ];
+
+    let currentCardIndex = 0;
+    let currentStep = 0;
+    let timer = null;
+
+    const imgEl = document.getElementById('card-img');
+    const lineWhoEl = document.getElementById('line-who');
+    const lineTitleEl = document.getElementById('line-title');
+    const counterEl = document.getElementById('card-counter');
+    const bgmAudio = document.getElementById('bgm-audio');
+
+    // BGMの音量設定 (15%)
+    bgmAudio.volume = 0.15;
+
+    function loadCard() {
+      clearTimeout(timer);
+      currentStep = 0;
+      const data = artData[currentCardIndex];
+      
+      // カウンター更新
+      counterEl.textContent = `${currentCardIndex + 1} / ${artData.length}`;
+
+      // BGM制御（ファイルパスが設定されている場合のみ再生）
+      if (data.bgm && data.bgm.trim() !== "") {
+        bgmAudio.src = data.bgm;
+        bgmAudio.play().catch(e => console.log("Auto-play blocked or audio missing."));
+      } else {
+        bgmAudio.pause();
+        bgmAudio.removeAttribute('src');
+      }
+
+      renderStep();
+    }
+
+    function renderStep() {
+      clearTimeout(timer);
+      const data = artData[currentCardIndex];
+
+      if (currentStep === 0) {
+        // Step 0: 肖像画 / Who? / Title?
+        imgEl.src = data.profileImg;
+        updateText("Who?", "Title?", false);
+      } 
+      else if (currentStep === 1) {
+        // Step 1: 作品1 / ??? ➔ 5秒後に作品名・美術館
+        imgEl.src = data.artworks[0].img;
+        updateText("???", "", false);
+        
+        timer = setTimeout(() => {
+          updateText(data.artworks[0].title, data.artworks[0].museum, true);
+        }, 5000);
+      } 
+      else if (currentStep === 2) {
+        // Step 2: 作品2 / ??? ➔ 5秒後に作品名・美術館
+        imgEl.src = data.artworks[1].img;
+        updateText("???", "", false);
+
+        timer = setTimeout(() => {
+          updateText(data.artworks[1].title, data.artworks[1].museum, true);
+        }, 5000);
+      } 
+      else if (currentStep === 3) {
+        // Step 3: 肖像画に戻る / 画家名 (生没年)
+        imgEl.src = data.profileImg;
+        updateText(data.painter, "", true);
+      }
+    }
+
+    function updateText(whoText, titleText, doFade) {
+      if (doFade) {
+        lineWhoEl.classList.add('fade-out');
+        lineTitleEl.classList.add('fade-out');
+        setTimeout(() => {
+          lineWhoEl.textContent = whoText;
+          lineTitleEl.textContent = titleText;
+          lineWhoEl.classList.remove('fade-out');
+          lineTitleEl.classList.remove('fade-out');
+        }, 300);
+      } else {
+        lineWhoEl.textContent = whoText;
+        lineTitleEl.textContent = titleText;
+      }
+    }
+
+    function nextStep() {
+      // Step 0 -> 1 -> 2 -> 3 -> 0 ... 循環
+      currentStep = (currentStep + 1) % 4;
+      renderStep();
+    }
+
+    function nextCard() {
+      currentCardIndex = (currentCardIndex + 1) % artData.length;
+      loadCard();
+    }
+
+    function prevCard() {
+      currentCardIndex = (currentCardIndex - 1 + artData.length) % artData.length;
+      loadCard();
+    }
+
+    // 初回ロード
+    window.onload = loadCard;
+  </script>
+</body>
+</html>
